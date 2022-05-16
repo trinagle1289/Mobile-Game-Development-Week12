@@ -24,48 +24,49 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.sp
 import tw.edu.pu.s1071554.week12.ui.theme.MobileGameDevelopmentWeek12Theme
 
-class MainActivity : ComponentActivity() {
+class MainActivity : ComponentActivity(), SensorEventListener {
+    lateinit var acc: Sensor
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            //MyApplicationTheme {
-            // A surface container using the 'background' color from the theme
-            Surface(
-                modifier = Modifier.fillMaxSize(),
-                color = MaterialTheme.colors.background
-            ) {
-                Greeting(this::myclick)
+            MobileGameDevelopmentWeek12Theme {
+                // A surface container using the 'background' color from the theme
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    color = MaterialTheme.colors.background
+                ) {
+                    Greeting("Android")
+                }
             }
-            //}
         }
+        var sm:SensorManager= getSystemService(SENSOR_SERVICE) as SensorManager
+        acc = sm.getDefaultSensor(Sensor.TYPE_ACCELEROMETER) as Sensor
+        sm.registerListener(this,acc,SensorManager.SENSOR_DELAY_NORMAL)
+
     }
-    fun myclick(){
-        requestPermissionLauncher.launch( CAMERA )
-        Toast.makeText(applicationContext,"Click", Toast.LENGTH_SHORT).show()
-    }
-    val requestPermissionLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()){
-            permit->
-        if (permit){
-            Toast.makeText(applicationContext,"同意", Toast.LENGTH_SHORT).show()
-            startActivity(Intent( applicationContext,ScanActivity::class.java))
-            // startLauncher.launch(Intent( MediaStore.ACTION_IMAGE_CAPTURE))
+    override fun onSensorChanged(event: SensorEvent?) {
+        when(event!!.sensor){
+            acc->{
+                valueStr.value = event.values[0].toString()+","+event.values[1].toString()+","+event.values[2].toString()
+                //    Toast.makeText(applicationContext,str,Toast.LENGTH_SHORT).show()
+            }
         }
+        // TODO("Not yet implemented")
+    }
+    override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
+        // TODO("Not yet implemented")
     }
 }
+var valueStr = mutableStateOf("")
 @Composable
-fun Greeting(myclick: ()->Unit) {
-    Column() {
-        Text(text = "按下scan barcode!", fontSize = 30.sp)
-        Button(onClick = myclick) {
-            Text(text="Scan")
-        }
-    }
-
+fun Greeting(name: String) {
+    Text(text = "Hello ${valueStr.value}", fontSize = 50.sp)
 }
 @Preview(showBackground = true)
 @Composable
 fun DefaultPreview() {
     MobileGameDevelopmentWeek12Theme {
-        Greeting(myclick = {})
+        Greeting("Android")
     }
 }
